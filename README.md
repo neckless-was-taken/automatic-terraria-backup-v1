@@ -15,7 +15,7 @@ The script was written up in batch so the source code should be relatively easy 
 Note that one of the files (minstart) has to be an exe for the script to function properly as it replaces the file you open through Steam. Anyway the source code is also listed here, just thought it's worth specifically mentioning
 
 ## Features:
-* Backs up Terraria Worlds and Players (Players can be turned on/off) every 30 minutes
+* Backs up Terraria Worlds and Players (backup for Players can be turned on/off) every 30 minutes
 * Zips up and archives last backup made after closing Terraria
   * **Requires 7zip and Backup and Sync by Google for the archiving feature**
 * Deletes backups older than x days (determined by user settings)
