@@ -19,7 +19,7 @@ Note that one of the files (minstart) has to be an exe for the script to functio
 * Zips up and archives last backup made after closing Terraria
   * **Requires 7zip and Backup and Sync by Google for the archiving feature**
 * Deletes backups older than x days (determined by user settings)
-* Self contained Initial Setup sequence which generates individual user settings (stored in usersettings.cmd)
+* Initial Setup sequence which generates individual user settings (stored in usersettings.cmd)
 * Launch Terraria through Steam or your usual shortcut and ATB opens automatically and closes when Terraria is closed
 * Opens Backup and Sync by Google together with Terraria and closes when Terraria is closed
 * Detects if Terraria.exe has been updated and re-sets it up so it works with ATB
