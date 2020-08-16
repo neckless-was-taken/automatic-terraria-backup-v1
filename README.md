@@ -7,9 +7,9 @@ Automatically backs up Terraria worlds and players
 * [Installation](#installation)
 
 ## General info
-The script was written up in batch so the code should be relatively easily understandable, I have added comments where they made sense
+The script was written up in batch so the code should be relatively easy to understand, I have added comments where they made sense
 
-* Requires 7zip and Backups and Sync by Google for the archiving feature
+* Requires 7zip and Backup and Sync by Google for the archiving feature
 
 ## Features:
 * Backs up Terraria Worlds and Players (Players can be turned on/off) every 30 minutes
