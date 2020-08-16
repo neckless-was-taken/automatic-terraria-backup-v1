@@ -7,19 +7,17 @@ Automatically backs up Terraria worlds and players
 * [Installation](#installation)
 
 ## General info
-As most of us know, Terraria can sometimes crash or be closed in the wrong moments which leads to corrupted save files.
-Obviously backing up your save files is a good idea and would somewhat negate a corrupted save file, but sometimes you can forget or just be lazy.
-This happened to me and my friend on our multiplayer world, so I decided to write up this script that does that automatically (hence the name) and have now made it easy to setup so I have decided to upload it here.
+As most of us know that Terraria can sometimes crash or be closed in the wrong moments which leads to corrupted save files.  
+Obviously backing up your save files is a good idea and would somewhat negate a corrupted save file, but sometimes you can forget or just be lazy.  
+This happened to me and my friend on our multiplayer world, so I decided to write up this script that does that automatically (hence the name) and have now made it easy to setup so I have decided to upload it here.  
 
-The script was written up in batch so the source code should be relatively easy to understand, I have added comments where they made sense
-
+The script was written up in batch so the source code should be relatively easy to understand, I have added comments where they made sense  
 Note that one of the files (minstart) has to be an exe for the script to function properly as it replaces the file you open through Steam. Anyway the source code is also listed here, just thought it's worth specifically mentioning
-
-* **Requires 7zip and Backup and Sync by Google for the archiving feature**
 
 ## Features:
 * Backs up Terraria Worlds and Players (Players can be turned on/off) every 30 minutes
-* Zips up and archives last backup made after closing Terraria (uses 7-zip)
+* Zips up and archives last backup made after closing Terraria
+  * **Requires 7zip and Backup and Sync by Google for the archiving feature**
 * Deletes backups older than x days (determined by user settings)
 * Self contained Initial Setup sequence which generates individual user settings (stored in usersettings.cmd)
 * Launch Terraria through Steam or your usual shortcut and ATB opens automatically and closes when Terraria is closed
