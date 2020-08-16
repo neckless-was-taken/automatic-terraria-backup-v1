@@ -30,6 +30,9 @@ title Automatic Terraria Backup
 set /A b=0
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+:: sets EXE variables for later use when checking if they're running in tasklist
+set game_EXE=Terraria_game.exe
+set backup_EXE=googledrivesync.exe
 
 call :art
 echo [%hour%:%time:~3,2%:%time:~6,2%] Welcome to Automatic Terraria backup!
@@ -37,11 +40,11 @@ echo [%hour%:%time:~3,2%:%time:~6,2%] This little script was written up by /u/ne
 echo [%hour%:%time:~3,2%:%time:~6,2%] https://github.com/neckless-was-taken/automatic-terraria-backup-v1
 
 :: Checks if usersettings.cmd exists
-if not exist "%cd%\usersettings.cmd" (call :initial_setup)
+if not exist "usersettings.cmd" (goto :initial_setup)
 
 :: Checks if game is running
 :game_check
-timeout /t 5 /nobreak > NUL
+::timeout /t 5 /nobreak > NUL
 if %b%==1 goto stop
 for /F %%x IN ('tasklist /NH /FI "IMAGENAME eq %game_EXE%"') DO IF %%x == %game_EXE% goto game_check_skip
 set b=1
@@ -60,42 +63,25 @@ exit
 if %b%==1 ( echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is finally running . . . ) else ( echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is running . . . )
 echo [%hour%:%time:~3,2%:%time:~6,2%] Starting Automatic Terraria Backup . . .
 
+
 :: checks if EXEs have been setup to work with the script, if not it renames them, also backs up current Terraria.exe
-if exist "%cd%\Terraria_game.exe" ( goto skip1 )
-mkdir .atb_backup > NUL
+if exist "Terraria_game.exe" ( goto skip1 )
+::mkdir .atb_backup > NUL
 copy "minstart.exe" ".atb_backup\minstart.exe" > NUL
 copy "Terraria.exe" ".atb_backup\Terraria_old.exe" > NUL
 ren Terraria.exe Terraria_game.exe > NUL
 ren minstart.exe Terraria.exe > NUL
-
-:: this part detects if terraria.exe has been updated by Steam by checking the Last Modified Dates
 :skip1
-forfiles /M Terraria.exe /C "cmd /c set terraria_lmdate=@fdate"
-forfiles /M Terraria_game.exe /C "cmd /c set terraria_game_lmdate=@fdate"
-if terraria_lmdate==terraria_game_lmdate goto skip2
-set hour=%time:~0,2%
-if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
-echo [%hour%:%time:~3,2%:%time:~6,2%] It appears that Terraria has updated
-echo [%hour%:%time:~3,2%:%time:~6,2%] Re-setting up Automatic Terraria Backup . . .
-del Terraria_game.exe > NUL
-ren Terraria.exe Terraria_game.exe > NUL
-copy .atb_backup\minstart.exe Terraria.exe > NUL
-:skip2
-
 call usersettings.cmd
 :: creates the directories used by the script
-mkdir "%destination_worlds%" > NUL
-mkdir "%archive%" > NUL
+if not exist "%destination_worlds%" mkdir "%destination_worlds%" > NUL
+if not exist "%archive%" mkdir "%archive%" > NUL
 :: checks if the user has set up players folder backup, if not skips this part
-if not players_conf==y ( goto skip3 )
-mkdir "%destination_players%" > NUL
-
+if not %players_conf%==y ( goto skip3 )
+if not exist "%destination_players%" mkdir "%destination_players%" > NUL
 :skip3
-:: sets EXE variables for later use when checking if they're running in tasklist and other variables
-set game_EXE=Terraria_game.exe
-set backup_EXE=googledrivesync.exe
+
 set tempo=%temp%\backuparchiver
-set /A a = 1
 :: checks if googledrivesync is opened, if not opens it
 for /F %%x IN ('tasklist /NH /FI "IMAGENAME eq %backup_EXE%"') DO IF %%x == %backup_EXE% goto start
 goto backup_start
@@ -103,7 +89,8 @@ goto backup_start
 :: start of main backup script
 
 :backup_start
-start "C:\Program Files\Google\Drive" googledrivesync.exe
+echo [%hour%:%time:~3,2%:%time:~6,2%] Starting Backup and Sync by Google . . .
+start "" "C:\Program Files\Google\Drive\googledrivesync.exe" 2> NUL
 timeout /t 5 /nobreak > NUL
 :start
 set /A t = 0
@@ -114,7 +101,7 @@ XCOPY /E /I  "%source_worlds%"  "%destination_worlds%\Worlds_%hour%%time:~3,2%-%
 forfiles -p "%destination_worlds%" -m *.* -d -%max_days% -c "cmd  /c del /q @path" 2> NUL
 forfiles -p "%destination_worlds%" -d -%max_days% -c "cmd /c IF @isdir == TRUE rd /S /Q @path" 2> NUL
 :: checks if the user has set up players folder backup, if not skips this part
-if not players_conf==y ( goto players_backup_skip )
+if not %players_conf%==y ( goto players_backup_skip )
 :: players backuper
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
@@ -134,11 +121,10 @@ goto archiver
 :game_found
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
-echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is still running
 set /A c =%t% %% %15%
 if %c%==0 echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is still running
 timeout /t 30 /nobreak > NUL
-set /A t = %t%+%a%
+set /A t = %t%+1
 if %t%==60 (goto start) else (goto loop)
 
 :: end of main backup script
@@ -155,7 +141,7 @@ FOR /f "delims=" %%a IN (
 )
 :worlds_archiver_done
 :: checks if the user has set up players folder backup, if not skips this part
-if not players_conf==y ( goto archiver_done )
+if not %players_conf%==y ( goto archiver_done )
 FOR /f "delims=" %%a IN (
   'dir /b /ad /o-d "%destination_players%\*" '
   ) DO XCOPY /S /I /N "%destination_players%\%%a" "%tempo%" &GOTO archiver_done
@@ -178,9 +164,9 @@ set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Cleaning up the temporary files created by Automatic Terraria Backup . . .
 if exist %tempo% RMDIR /S /Q %tempo%
-echo [%hour%:%time:~3,2%:%time:~6,2%] Stopping Backup & Sync from Google in 10 seconds and then exiting . . .
-timeout /t 10 /nobreak > NUL
-taskkill /im googledrivesync.exe
+echo [%hour%:%time:~3,2%:%time:~6,2%] Stopping Backup ^& Sync from Google in 30 seconds to let it finish uploading and then exiting . . .
+timeout /t 30 /nobreak > NUL
+taskkill /im %backup_EXE% /F
 timeout /t 3 /nobreak > NUL
 exit
 
@@ -277,7 +263,6 @@ goto usersettings_writer
 echo.
 echo [%hour%:%time:~3,2%:%time:~6,2%] Writing usersettings.cmd . . .
 >usersettings.cmd (
-echo @echo off
 echo.
 echo  :: this determines if you want to backup your players [y/n] lower case letters only!
 echo set players_conf=%players_conf%
@@ -302,14 +287,19 @@ echo.
 echo  :: any backups older than max_days will get deleted next time you run the backup script. This is why there's an archive of the last backup made everytime you close the script
 echo set max_days=%max_days%
 echo.
-echo exit
 )
 
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+mkdir .atb_backup > NUL
+copy "minstart.exe" ".atb_backup\minstart.exe" > NUL
+copy "Terraria.exe" ".atb_backup\Terraria_old.exe" > NUL
+ren Terraria.exe Terraria_game.exe > NUL
+ren minstart.exe Terraria.exe > NUL
 echo [%hour%:%time:~3,2%:%time:~6,2%] Initial set up has been completed
-echo [%hour%:%time:~3,2%:%time:~6,2%] Press any key to go back to the backup script . . .
+echo [%hour%:%time:~3,2%:%time:~6,2%] You can now launch Terraria through Steam and the script will run automatically
+echo [%hour%:%time:~3,2%:%time:~6,2%] Press any key to exit . . .
 pause > NUL
-exit /B
+exit
 
 :: end of code
