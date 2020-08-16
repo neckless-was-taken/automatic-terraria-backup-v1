@@ -1,3 +1,29 @@
+::                   _    _                         
+::                  | |  | |                        
+::   _ __   ___  ___| | _| | ___  ___ ___           
+::  |  _ \ / _ \/ __| |/ / |/ _ \/ __/ __|          
+::  | | | |  __/ (__|   <| |  __/\__ \__ \   ______ 
+::  |_| |_|\___|\___|_|\_\_|\___||___/___/  |______|
+::                                                  
+::
+::
+:: https://github.com/neckless-was-taken/automatic-terraria-backup-v1
+:: This is an automatic terraria worlds and players backup script written up by /u/neckless_ or neckless-was-taken on GitHub
+:: If you're looking to change your directories, this isn't where you'll find them, go to usersettings.cmd and edit that
+::
+:: Other than that you're welcome to look through this and if you have any suggestions message me on Reddit or add it as an issue on GitHub
+:: I have added comments to most sections to explain what they're intended to do so should be relatively easy to look through the code
+::
+::
+::
+::
+::
+::
+::
+::
+::
+::
+::
 @echo off
 SETLOCAL EnableExtensions
 title Automatic Terraria Backup
@@ -7,7 +33,8 @@ if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 
 call :art
 echo [%hour%:%time:~3,2%:%time:~6,2%] Welcome to Automatic Terraria backup!
-echo [%hour%:%time:~3,2%:%time:~6,2%] This little script was written up by /u/neckless_
+echo [%hour%:%time:~3,2%:%time:~6,2%] This little script was written up by /u/neckless_ or neckless-was-taken on GitHub
+echo [%hour%:%time:~3,2%:%time:~6,2%] https://github.com/neckless-was-taken/automatic-terraria-backup-v1
 
 :: Checks if usersettings.cmd exists
 if not exist "%cd%\usersettings.cmd" (call :initial_setup)
@@ -33,7 +60,7 @@ exit
 if %b%==1 ( echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is finally running . . . ) else ( echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is running . . . )
 echo [%hour%:%time:~3,2%:%time:~6,2%] Starting Automatic Terraria Backup . . .
 
-:: checks if EXEs have been renamed to what they should be, if not it renames them
+:: checks if EXEs have been setup to work with the script, if not it renames them, also backs up current Terraria.exe
 if exist "%cd%\Terraria_game.exe" ( goto skip1 )
 mkdir .atb_backup > NUL
 copy "minstart.exe" ".atb_backup\minstart.exe" > NUL
@@ -41,6 +68,7 @@ copy "Terraria.exe" ".atb_backup\Terraria_old.exe" > NUL
 ren Terraria.exe Terraria_game.exe > NUL
 ren minstart.exe Terraria.exe > NUL
 
+:: this part detects if terraria.exe has been updated by Steam by checking the Last Modified Dates
 :skip1
 forfiles /M Terraria.exe /C "cmd /c set terraria_lmdate=@fdate"
 forfiles /M Terraria_game.exe /C "cmd /c set terraria_game_lmdate=@fdate"
@@ -66,8 +94,8 @@ mkdir "%destination_players%" > NUL
 :: sets EXE variables for later use when checking if they're running in tasklist and other variables
 set game_EXE=Terraria_game.exe
 set backup_EXE=googledrivesync.exe
-set /A a = 1
 set tempo=%temp%\backuparchiver
+set /A a = 1
 :: checks if googledrivesync is opened, if not opens it
 for /F %%x IN ('tasklist /NH /FI "IMAGENAME eq %backup_EXE%"') DO IF %%x == %backup_EXE% goto start
 goto backup_start
@@ -95,6 +123,7 @@ forfiles -p "%destination_players%" -m *.* -d -%max_days% -c "cmd  /c del /q @pa
 forfiles -p "%destination_players%" -d -%max_days% -c "cmd /c IF @isdir == TRUE rd /S /Q @path" 2> NUL
 :players_backup_skip
 
+:: this loop continously checks if the game is running,
 :loop
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
