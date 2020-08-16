@@ -22,7 +22,6 @@ Note that one of the files (minstart) has to be an exe for the script to functio
 * Initial Setup sequence which generates individual user settings (stored in usersettings.cmd)
 * Launch Terraria through Steam or your usual shortcut and ATB opens automatically and closes when Terraria is closed
 * Opens Backup and Sync by Google together with Terraria and closes when Terraria is closed
-* Detects if Terraria.exe has been updated and re-sets it up so it works with ATB
 
 ## Installation:
 1. Download and install 7-zip in its default location ([Download link](https://www.7-zip.org/ "https://www.7-zip.org/"))
