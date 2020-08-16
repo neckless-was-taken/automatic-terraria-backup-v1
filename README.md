@@ -1,5 +1,6 @@
 # Automatic Terraria Backup v1
 Automatically backs up Terraria worlds and players
+
 ## Table of contents
 * [General info](#general-info)
 * [Features](#features)
@@ -22,7 +23,7 @@ The script was written up in batch so the code should be relatively easily under
 ## Installation:
 1. Download and install 7-zip in its default location ([Download link](https://www.7-zip.org/ "https://www.7-zip.org/"))
 2. Download and install Backup & Sync by Google ([Download link](https://www.google.com/drive/download/ "https://www.google.com/drive/download/"))
-3. Download the latest release of ATB and extract the files in your Terraria install folder 
+3. Download the [latest release](https://github.com/neckless-was-taken/automatic-terraria-backup-v1/releases/latest) of ATB and extract the files in your Terraria install folder 
    * To find your Terraria install open up your Steam Library->right-click Terraria->Properties...->Local files->Browse local files...
 4. Launch terrariabackup.bat and go through the initial setup
 5. After that you can launch Terraria through Steam like normal and ATB will automatically open in the background
