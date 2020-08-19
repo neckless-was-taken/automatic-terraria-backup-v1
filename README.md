@@ -5,6 +5,7 @@ Automatically backs up Terraria worlds and players
 * [General info](#general-info)
 * [Features](#features)
 * [Installation](#installation)
+* [Google Drive setup](#google-drive-setup)
 
 ## General info
 As most of us know, Terraria can sometimes crash or be closed in the wrong moments which leads to corrupted save files.  
@@ -30,3 +31,10 @@ Note that one of the files (minstart) has to be an exe for the script to functio
    * To find your Terraria install open up your Steam Library->right-click Terraria->Properties...->Local files->Browse local files...
 4. Launch terrariabackup.bat and go through the initial setup
 5. After that you can launch Terraria through Steam like normal and ATB will automatically open in the background
+
+## Google Drive setup:
+To setup your Backup & Sync by Google so it uploads your archived backups to your Google Drive all you need to do is:
+1. Install it & Login
+2. Left click the System Tray icon, click on the three dots and click on Preferences...
+3. Under "My Computer" click on "CHOOSE FOLDER" and select the folder where your archived backups are
+4. Then you'll find your backups in your Google Drive->Computers->My Computer->Archived ([Screenshot](https://i.imgur.com/Exl4sTk.png))
