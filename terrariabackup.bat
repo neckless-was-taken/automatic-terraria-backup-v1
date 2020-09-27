@@ -5,7 +5,7 @@
 ::  | | | |  __/ (__|   <| |  __/\__ \__ \   ______ 
 ::  |_| |_|\___|\___|_|\_\_|\___||___/___/  |______|
 ::                                                  
-::
+:: 
 ::
 :: https://github.com/neckless-was-taken/automatic-terraria-backup-v1
 :: This is an automatic terraria worlds and players backup script written up by /u/neckless_ or neckless-was-taken on GitHub
