@@ -5,7 +5,7 @@
 ::  | | | |  __/ (__|   <| |  __/\__ \__ \   ______ 
 ::  |_| |_|\___|\___|_|\_\_|\___||___/___/  |______|
 ::                                                  
-:: 
+::
 ::
 :: https://github.com/neckless-was-taken/automatic-terraria-backup-v1
 :: This is an automatic terraria worlds and players backup script written up by /u/neckless_ or neckless-was-taken on GitHub
@@ -83,8 +83,11 @@ if not %players_conf%==y ( goto skip2 )
 if not exist "%destination_players%" mkdir "%destination_players%" > NUL
 :skip2
 
+:: sets temporary folder directory and makes the directory
 set tempo=%temp%\backuparchiver
-mkdir %tempo%
+mkdir %tempo% > NUL
+:: starts backup and sync by google
+start "" "%gdrive%\googledrivesync.exe" 2> NUL
 goto start
 
 :: start of main backup script
@@ -135,7 +138,6 @@ if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 :: checks if googledrivesync is opened, if not opens it
 for /F %%x IN ('tasklist /NH /FI "IMAGENAME eq %backup_EXE%"') DO IF %%x == %backup_EXE% goto skip3
 echo [%hour%:%time:~3,2%:%time:~6,2%] Starting Backup and Sync by Google . . .
-start "" "C:\Program Files\Google\Drive\googledrivesync.exe" 2> NUL
 timeout /t 5 /nobreak > NUL
 :skip3
 mkdir  %tempo% 2> NUL
@@ -260,6 +262,9 @@ set /p "archive=[%hour%:%time:~3,2%:%time:~6,2%] Where do you want your archived
 echo [%hour%:%time:~3,2%:%time:~6,2%] Archived backup folder set as : %archive%
 echo [%hour%:%time:~3,2%:%time:~6,2%] This is the folder you need to set up to be automatically uploaded to your Google Drive using "Backup and Sync by Google"
 echo.
+set gdrive=C:\Program Files\Google\Drive
+set /p "gdrive=[%hour%:%time:~3,2%:%time:~6,2%] Where is your Backup and Sync by Google installed? [Default=%gdrive%] : " string ( str ^)  
+echo [%hour%:%time:~3,2%:%time:~6,2%] Backup and Sync by Google install directory set as : %gdrive%
 goto usersettings_writer
 
 :: writes usersettings.cmd in current directory
@@ -287,6 +292,9 @@ echo set destination_players=%destination_players%
 echo.
 echo  :: this is where your archived backups end up and this is the folder you want to set up to automatically upload to your google drive
 echo set archive=%archive%
+echo.
+echo  :: this is the directory you have set up as your backup and sync by google install directory (default was C:\Program Files\Google\Drive)
+echo set gdrive=%gdrive%
 echo.
 echo  :: any backups older than max_days will get deleted next time you run the backup script. This is why there's an archive of the last backup made everytime you close the script
 echo set max_days=%max_days%
