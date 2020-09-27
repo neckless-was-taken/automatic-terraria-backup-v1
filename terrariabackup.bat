@@ -40,13 +40,41 @@ call :art
 echo [%hour%:%time:~3,2%:%time:~6,2%] Welcome to Automatic Terraria backup!
 echo [%hour%:%time:~3,2%:%time:~6,2%] This little script was written up by /u/neckless_ or neckless-was-taken on GitHub
 echo [%hour%:%time:~3,2%:%time:~6,2%] https://github.com/neckless-was-taken/automatic-terraria-backup-v1
-
+echo.
+timeout /t 2 /nobreak > NUL
 :: Checks if usersettings.cmd exists
 if not exist "usersettings.cmd" (goto :initial_setup)
+:: checks if any variables in usersettings.cmd are missing
+
+echo [%hour%:%time:~3,2%:%time:~6,2%] Checking if usersettings.cmd appears to be set-up correctly
+:: sets all variables currently stored in usersettings.cmd to "0"
+set players_conf=0
+set source_worlds=0
+set source_players=0
+set destination_worlds=0
+set destination_players=0
+set archive=0
+set gdrive=0
+set max_days=0
+:: calls usersettings.cmd to rewrite all the variables in there to their actual value
+call usersettings.cmd
+timeout /t 3 /nobreak > NUL
+:: checks if variable is still "0"
+if %players_conf%==0 ( goto :initial_setup_error )
+if %source_worlds%==0 ( goto :initial_setup_error )
+if %source_players%==0 ( goto :initial_setup_error )
+if %destination_worlds%==0 ( goto :initial_setup_error )
+if %destination_players%==0 ( goto :initial_setup_error )
+if %archive%==0 ( goto :initial_setup_error )
+if %gdrive%==0 ( goto :initial_setup_error )
+if %max_days%==0 ( goto :initial_setup_error )
+echo [%hour%:%time:~3,2%:%time:~6,2%] Everything appears to be in order :^)
 
 :: Checks if game is running
 :game_check
 timeout /t 5 /nobreak > NUL
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 if %b%==1 goto stop
 for /F %%x IN ('tasklist /NH /FI "IMAGENAME eq %game_EXE%"') DO IF %%x == %game_EXE% goto game_check_skip
 set b=1
@@ -66,26 +94,17 @@ if %b%==1 ( echo [%hour%:%time:~3,2%:%time:~6,2%] Terraria is finally running . 
 echo [%hour%:%time:~3,2%:%time:~6,2%] Starting Automatic Terraria Backup . . .
 
 
-:: checks if EXEs have been setup to work with the script, if not it renames them, also backs up current Terraria.exe
-if exist "Terraria_game.exe" ( goto skip1 )
-mkdir .atb_backup > NUL
-copy "minstart.exe" ".atb_backup\minstart.exe" > NUL
-copy "Terraria.exe" ".atb_backup\Terraria_old.exe" > NUL
-ren Terraria.exe Terraria_game.exe > NUL
-ren minstart.exe Terraria.exe > NUL
-:skip1
-call usersettings.cmd
 :: creates the directories used by the script
-if not exist "%destination_worlds%" mkdir "%destination_worlds%" > NUL
-if not exist "%archive%" mkdir "%archive%" > NUL
+if not exist "%destination_worlds%" mkdir "%destination_worlds%" 2> NUL
+if not exist "%archive%" mkdir "%archive%" 2> NUL
 :: checks if the user has set up players folder backup, if not skips this part
-if not %players_conf%==y ( goto skip2 )
-if not exist "%destination_players%" mkdir "%destination_players%" > NUL
-:skip2
+if not %players_conf%==y ( goto skip1 )
+if not exist "%destination_players%" mkdir "%destination_players%" 2> NUL
+:skip1
 
 :: sets temporary folder directory and makes the directory
 set tempo=%temp%\backuparchiver
-mkdir %tempo% > NUL
+mkdir %tempo% 2> NUL
 :: starts backup and sync by google
 start "" "%gdrive%\googledrivesync.exe" 2> NUL
 goto start
@@ -191,10 +210,29 @@ exit /B
 
 :: initial setup sequence
 :initial_setup
+set /A reset=0
+if not exist "Terraria_game.exe" ( goto initial_setup_skip1 )
+:: used when re-setting up the script
+set /A reset=1
+del Terraria.exe 2> NUL
+del Terraria_game.exe 2> NUL
+copy ".atb_backup\minstart.exe" "minstart.exe" 2> NUL
+copy ".atb_backup\Terraria_old.exe" "Terraria.exe" 2> NUL
+RMDIR /S /Q .atb_backup 2> NUL
+
+:initial_setup_skip1
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo.
+
+if %reset% == 1 ( goto reset_1 )
 echo [%hour%:%time:~3,2%:%time:~6,2%] Looks like this is the first time you've opened Automatic Terraria Backup
+goto initial_setup_skip2
+:reset_1
+echo [%hour%:%time:~3,2%:%time:~6,2%] Looks like you are re-installing Automatic Terraria Backup, don't worry, it's going to be just as easy as the first time
+goto initial_setup_skip2
+
+:initial_setup_skip2
 echo [%hour%:%time:~3,2%:%time:~6,2%] Let's set you up! All you need to do is point at some directories
 echo [%hour%:%time:~3,2%:%time:~6,2%] If you want to use the default locations, just press Enter when prompted
 echo [%hour%:%time:~3,2%:%time:~6,2%] You can change these directories at any time by editing the usersettings.cmd file in your Terraria install folder
@@ -203,19 +241,28 @@ echo.
 echo [%hour%:%time:~3,2%:%time:~6,2%] Press any key to continue . . .
 pause > NUL
 echo.
+goto initial_setup_skip3
+
+:initial_setup_skip3
 
 set source_worlds=%USERPROFILE%\Documents\My Games\Terraria\Worlds
 echo [%hour%:%time:~3,2%:%time:~6,2%] If you have Steam Cloud turned on for the worlds you want to actively back up set this to [Steam install directory]/userdata/[Your Steam ID]/105600/remote/worlds
 set /p "source_worlds=[%hour%:%time:~3,2%:%time:~6,2%] Location of your worlds folder [Default=%source_worlds%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Worlds folder set as : %source_worlds%
 echo.
 
 set destination_worlds=%USERPROFILE%\Desktop\Terraria Backups\Worlds
 set /p "destination_worlds=[%hour%:%time:~3,2%:%time:~6,2%] Where you want your worlds backups to end up at [Default=%destination_worlds%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Worlds backup storage folder set as : %destination_worlds%
 echo.
 
 :players_question
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 set /P "players_conf=[%hour%:%time:~3,2%:%time:~6,2%] Do you want to also backup your Players folder? [Y/N]: " string ( str ^) 
 if "%players_conf%" == "" ( goto players_question )
 if %players_conf%== y goto players_yes
@@ -230,40 +277,68 @@ set destination_players=%USERPROFILE%\Desktop\Terraria Backups\Players
 goto players_skip
 
 :players_yes
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo.
 set source_players=%USERPROFILE%\Documents\My Games\Terraria\Players
 echo [%hour%:%time:~3,2%:%time:~6,2%] If you have Steam Cloud turned on for the Players you want to actively back up set this to [Steam install directory]/userdata/[Your Steam ID]/105600/remote/players
 set /p "source_players=[%hour%:%time:~3,2%:%time:~6,2%] Location of your Players folder [Default=%source_players%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Players folder set as : %source_players%
 echo.
 set destination_players=%USERPROFILE%\Desktop\Terraria Backups\Players
 set /p "destination_players=[%hour%:%time:~3,2%:%time:~6,2%] Where you want your players backups to end up at [Default=%destination_players%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Players backup storage folder set as : %destination_players%
 goto players_skip
 :players_skip
 echo.
 
+:max_days_reset
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 set max_days=1
-set /p "source_worlds=[%hour%:%time:~3,2%:%time:~6,2%] How long do you want your backups to be there before they get deleted? [in days] [Default=%max_days%] : " string ( str ^)  
-if "%max_days%" GTR "1" goto max_days_2
-goto max_days_1
+set /p "max_days=[%hour%:%time:~3,2%:%time:~6,2%] How long do you want your backups to be there before they get deleted? [in days] [Default=%max_days%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+:: all of the following is just to make the code say "day" or "days" correctly, what am i even doing lol
+if %max_days% == 0 goto max_days_0
+if %max_days% GTR 99 goto max_days_99
+if %max_days% == 1 goto max_days_1
+if %max_days% GTR 1 ( goto max_days_2 )
+goto max_days_reset
 :max_days_2
+if %max_days:~1,1% == 1 ( goto max_days_21 )
 echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set as : %max_days% days
 goto max_days_skip
 :max_days_1
 set max_days=1
+:max_days_21
 echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set as : %max_days% day
 goto max_days_skip
+:max_days_99
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set too high, maximum allowed is 99 days
+goto max_days_reset
+:max_days_0
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max bacup age can not be 0, making it 1
+goto max_days_1
 :max_days_skip
+::                                                                                                      
 echo.
 
 set archive=%USERPROFILE%\Desktop\Terraria Backups\Archive
 set /p "archive=[%hour%:%time:~3,2%:%time:~6,2%] Where do you want your archived backups to end up? [Default=%archive%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Archived backup folder set as : %archive%
 echo [%hour%:%time:~3,2%:%time:~6,2%] This is the folder you need to set up to be automatically uploaded to your Google Drive using "Backup and Sync by Google"
 echo.
 set gdrive=C:\Program Files\Google\Drive
 set /p "gdrive=[%hour%:%time:~3,2%:%time:~6,2%] Where is your Backup and Sync by Google installed? [Default=%gdrive%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Backup and Sync by Google install directory set as : %gdrive%
 goto usersettings_writer
 
@@ -302,19 +377,150 @@ echo.
 )
 
 :: does some renaming of files, makes a backup in current directory for Terraria.exe and minstart.exe at ..\.atb_backup\
-:: if something breaks and the script no longer launches with Terraria, delete your Terraria.exe, Terraria_game.exe
+:: if something breaks and the script no longer launches with Terraria, delete your usersettings.cmd
 :: the script will do the renaming automatically
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
-mkdir .atb_backup > NUL
-copy "minstart.exe" ".atb_backup\minstart.exe" > NUL
-copy "Terraria.exe" ".atb_backup\Terraria_old.exe" > NUL
-ren Terraria.exe Terraria_game.exe > NUL
-ren minstart.exe Terraria.exe > NUL
+mkdir .atb_backup 2> NUL
+copy "minstart.exe" ".atb_backup\minstart.exe" 2> NUL
+copy "Terraria.exe" ".atb_backup\Terraria_old.exe" 2> NUL
+ren Terraria.exe Terraria_game.exe 2> NUL
+ren minstart.exe Terraria.exe 2> NUL
 echo [%hour%:%time:~3,2%:%time:~6,2%] Initial set up has been completed
+echo [%hour%:%time:~3,2%:%time:~6,2%] If at any point you want to re-do the initial setup sequence (i.e. the script breaks), just delete the usersettings.cmd file
 echo [%hour%:%time:~3,2%:%time:~6,2%] You can now launch Terraria through Steam and the script will run automatically
+echo.
 echo [%hour%:%time:~3,2%:%time:~6,2%] Press any key to exit . . .
 pause > NUL
 exit
 
+:: if there appears to be missing variable in usersettings, this code runs
+:initial_setup_error
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Looks like you're missing one or a few variables in your usersettings.cmd Let's go through the one's you're missing.
+
+:: source_worlds_error
+if not "%source_worlds%" == "0" ( goto source_worlds_error_skip )
+set source_worlds=%USERPROFILE%\Documents\My Games\Terraria\Worlds
+set /p "source_worlds=[%hour%:%time:~3,2%:%time:~6,2%] Location of your worlds folder [Default=%source_worlds%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Worlds folder set as : %source_worlds%
+echo.
+:source_worlds_error_skip
+
+:: destination_worlds_error
+if not "%destination_worlds%" == "0" ( goto destination_worlds_error_skip )
+set destination_worlds=%USERPROFILE%\Desktop\Terraria Backups\Worlds
+set /p "destination_worlds=[%hour%:%time:~3,2%:%time:~6,2%] Where you want your worlds backups to end up at [Default=%destination_worlds%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Worlds backup storage folder set as : %destination_worlds%
+echo.
+:destination_worlds_error_skip
+
+:: players_error
+if not "%players_conf%" == "0" ( goto players_conf_error_skip )
+:players_error_question
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+set /P "players_conf=[%hour%:%time:~3,2%:%time:~6,2%] Do you want to also backup your Players folder? [Y/N]: " string ( str ^) 
+if "%players_conf%" == "" ( goto players_error_question )
+:players_conf_error_skip
+if %players_conf%== y goto players_error_yes
+if %players_conf%== n goto players_error_no
+if %players_conf%== Y goto players_error_yes
+if %players_conf%== N goto players_error_no
+
+:players_error_no
+if not "%source_players%" == "0" ( goto source_players_error_skip )
+set source_players=%USERPROFILE%\Documents\My Games\Terraria\Players
+:source_players_error_skip
+if not "%destination_players%" == "0" ( goto destination_players_error_skip )
+set destination_players=%USERPROFILE%\Desktop\Terraria Backups\Players
+:destination_players_error_skip
+goto players_error_skip
+
+:players_error_yes
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo.
+if not "%source_players%" == "0" ( goto source_players_error_skip1 )
+set source_players=%USERPROFILE%\Documents\My Games\Terraria\Players
+echo [%hour%:%time:~3,2%:%time:~6,2%] If you have Steam Cloud turned on for the Players you want to actively back up set this to [Steam install directory]/userdata/[Your Steam ID]/105600/remote/players
+set /p "source_players=[%hour%:%time:~3,2%:%time:~6,2%] Location of your Players folder [Default=%source_players%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Players folder set as : %source_players%
+echo.
+:source_players_error_skip1
+if not "%destination_players%" == "0" ( goto destination_players_error_skip1 )
+set destination_players=%USERPROFILE%\Desktop\Terraria Backups\Players
+set /p "destination_players=[%hour%:%time:~3,2%:%time:~6,2%] Where you want your players backups to end up at [Default=%destination_players%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Players backup storage folder set as : %destination_players%
+:destination_players_error_skip1
+goto players_error_skip
+:players_error_skip
+
+:: max_days_error
+if not "%max_days%" == "0" ( goto max_days_error_skip )
+:max_days_error_reset
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+set max_days=1
+set /p "max_days=[%hour%:%time:~3,2%:%time:~6,2%] How long do you want your backups to be there before they get deleted? [in days] [Default=%max_days%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+:: all of the following is just to make the code say "day" or "days" correctly, what am i even doing lol
+if %max_days% == 0 goto max_days_error_0
+if %max_days% GTR 99 goto max_days_error_99
+if %max_days% == 1 goto max_days_error_1
+if %max_days% GTR 1 goto max_days_error_2
+goto max_days_error_reset
+:max_days_error_2
+if %max_days:~1,1% == 1 ( goto max_days_error_21 )
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set as : %max_days% days
+goto max_days_error_skip
+:max_days_error_1
+set max_days=1
+:max_days_error_21
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set as : %max_days% day
+goto max_days_error_skip
+:max_days_error_99
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max backup age set too high, maximum allowed is 99 days
+goto max_days_error_reset
+:max_days_error_0
+echo [%hour%:%time:~3,2%:%time:~6,2%] Max bacup age can not be 0, making it 1
+goto max_days_error_1
+::                                                                                                      
+:max_days_error_skip
+
+:: archive_error
+if not "%archive%" == "0" ( goto archive_error_skip )
+set archive=%USERPROFILE%\Desktop\Terraria Backups\Archive
+set /p "archive=[%hour%:%time:~3,2%:%time:~6,2%] Where do you want your archived backups to end up? [Default=%archive%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Archived backup folder set as : %archive%
+echo [%hour%:%time:~3,2%:%time:~6,2%] This is the folder you need to set up to be automatically uploaded to your Google Drive using "Backup and Sync by Google"
+echo.
+:archive_error_skip
+
+:: gdrive_error
+if not "%gdrive%" == "0" ( goto gdrive_error_skip )
+set gdrive=C:\Program Files\Google\Drive
+set /p "gdrive=[%hour%:%time:~3,2%:%time:~6,2%] Where is your Backup and Sync by Google installed? [Default=%gdrive%] : " string ( str ^)  
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
+echo [%hour%:%time:~3,2%:%time:~6,2%] Backup and Sync by Google install directory set as : %gdrive%
+:gdrive_error_skip
+del /S /Q usersettings.cmd
+goto usersettings_writer
+:: end of initial setup error
+
 :: end of code
+
+pause
