@@ -25,7 +25,7 @@
 ::
 ::
 @echo off
-title Automatic Terraria Backup uninstaller
+title Automatic Terraria Backup Uninstaller
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 call :art
@@ -46,17 +46,20 @@ set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo.
 echo [%hour%:%time:~3,2%:%time:~6,2%] Sad to see you go! :(
-:: this is what it actually does                                                                                          
-del "Terraria.exe" > NUL
-del "terrariabackup.bat"  > NUL
-del "usersettings.cmd" > NUL
-ren "Terraria_game.exe" "Terraria.exe"  > NUL
-del ".backup\minstart.exe" > NUL
-rmdir "%temp%\backuparchiver" > NUL
+call usersettings.cmd > NUL
 ::                                                                                                                        
+:: this is what it actually does                                                                                          
+del "Terraria.exe" 2> NUL
+del "terrariabackup.bat"  2> NUL
+del "usersettings.cmd" 2> NUL
+ren "Terraria_game.exe" "Terraria.exe"  2> NUL
+del ".backup\minstart.exe" 2> NUL
+rmdir "%temp%\backuparchiver" 2> NUL
+::                                                                                                                        
+set hour=%time:~0,2%
+if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Automatic Terraria Backup files have been removed and Terraria has been set up to work as normal!
 echo [%hour%:%time:~3,2%:%time:~6,2%] The backups and archived backups made by the script have been left untouched. Their locations were set as : 
-call usersettings.cmd > NUL
 echo [%hour%:%time:~3,2%:%time:~6,2%] Worlds backup storage folder set as : %destination_worlds%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Players backup storage folder set as : %destination_players%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Archived backup folder set as : %archive%
@@ -73,7 +76,7 @@ goto exit
 set hour=%time:~0,2%
 if "%hour:~0,1%" == " "  set hour=0%hour:~1,1%
 echo [%hour%:%time:~3,2%:%time:~6,2%] Press any key to exit . . .
-pause >NUL
+pause > NUL
 exit
 
 :art
